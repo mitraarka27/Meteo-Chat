@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WeatherMCPResponse",
+  "type": "object",
+  "required": ["title","answer","key_numbers","figures","method","citations","limitations","suggested_followups"],
+  "properties": {
+    "title": {"type": "string"},
+    "answer": {"type": "string"},
+    "key_numbers": {"type": "array","items":{"type":"string"}},
+    "figures": {
+      "type": "array",
+      "items": {
+        "type":"object",
+        "required":["variable","caption","img_b64"],
+        "properties":{
+          "variable":{"type":"string"},
+          "caption":{"type":"string"},
+          "img_b64":{"type":"string"}
+        }
+      }
+    },
+    "method": {"type":"string"},
+    "citations": {"type":"array","items":{"type":"string"}},
+    "limitations": {"type":"array","items":{"type":"string"}},
+    "suggested_followups": {"type":"array","items":{"type":"string"}}
+  }
+}

@@ -1,0 +1,4 @@
+# Example intents (free text)
+- "Typical temperature in India"
+- "Winds, clouds, rainfall over Spain this week"
+- "Soil moisture and air temp in Kyoto today"

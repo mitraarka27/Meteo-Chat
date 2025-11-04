@@ -1,0 +1,13 @@
+mcp:
+  host: "127.0.0.1"
+  port: 8787
+open_meteo:
+  rate_limit_ms: 1000
+  cache_ttl:
+    current: 300
+    forecast: 3600
+    historical: 86400
+features:
+  air_quality: false
+  marine: false
+  solar: true

@@ -1,0 +1,11 @@
+streamlit
+matplotlib
+pandas
+numpy
+requests
+pytz
+timezonefinder
+transformers
+peft
+accelerate
+datasets

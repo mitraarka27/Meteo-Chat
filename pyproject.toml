@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meteo-chat"
+version = "0.1.0"
+description = "Meteo-Chat: dataset-bounded weather summaries with a polished Streamlit UI."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Arka Mitra" }]
+requires-python = ">=3.9"
+
+dependencies = [
+  "streamlit>=1.34",
+  "pandas>=2.1",
+  "matplotlib>=3.8",
+  "requests>=2.31",
+]
+
+[project.urls]
+Homepage = "https://github.com/mitraarka27/weatherai"
+Issues   = "https://github.com/mitraarka27/weatherai/issues"
+
+[project.scripts]
+# one-shot launcher (starts MCP then Streamlit)
+meteo-chat      = "meteo_chat.cli:main"
+# optional direct entrypoints
+meteo-chat-app  = "meteo_chat.cli:run_app"
+meteo-chat-mcp  = "meteo_chat.cli:run_mcp"
+
+[tool.setuptools]
+include-package-data = true
+
+# 🔑 auto-discover ALL packages (so mcp_server is included)
+[tool.setuptools.packages.find]
+include = ["meteo_chat*", "mcp_server*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+# If you ship non-Python files inside meteo_chat/, list them here (optional)
+[tool.setuptools.package-data]
+meteo_chat = ["static/**", "assets/**"]

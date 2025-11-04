@@ -1,0 +1,5 @@
+providers:
+  open_meteo:
+    base_url: "https://api.open-meteo.com"
+  nominatim:
+    base_url: "https://nominatim.openstreetmap.org"

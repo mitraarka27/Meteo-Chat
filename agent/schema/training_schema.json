@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": ["system","input","output"],
+  "properties": {
+    "system": {"type":"string"},
+    "input": {
+      "type":"object",
+      "required": ["place","time_mode","plan","execute_result","timestamp_utc"]
+    },
+    "output": {"$ref": "./response_schema.json"}
+  }
+}
