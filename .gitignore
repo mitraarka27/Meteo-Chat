@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+env/
+*.log
+
+# training outputs / checkpoints
+artifacts/adapter/checkpoint-*/
+artifacts/*/optimizer.pt
+artifacts/*/rng_state.pth
+artifacts/*/scheduler.pt
+artifacts/*/trainer_state.json
+artifacts/*/training_args.bin
+
+# IDE / build
+.vscode/
+.idea/
+build/
+dist/
+*.egg-info/
