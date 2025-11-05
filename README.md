@@ -73,7 +73,7 @@ The project also showcases:
 
 Clone the repository:
 ```bash
-git clone https://github.com/<your-username>/weatherai.git
+git clone https://github.com/mitraarka27/Meteo-Chat.git
 cd weatherai
 ```
 
