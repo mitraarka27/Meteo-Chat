@@ -15,9 +15,9 @@ The goal is to provide **data-driven, interpretable, and interactive weather sum
 It can summarize, visualize, and converse about weather variables (e.g., temperature, wind, humidity, rain) for any location and timeframe.
 
 <p align="center">
-  <img src="docs/overview.png" height="32%" />
-  <img src="docs/time_series.png" height="32%" />
-  <img src="docs/boxplot.png" height="32%" />
+  <img src="docs/overview.png" height="12%" />
+  <img src="docs/time_series.png" height="12%" />
+  <img src="docs/boxplot.png" height="12%" />
 </p>
 
 ---
