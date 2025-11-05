@@ -15,9 +15,7 @@ The goal is to provide **data-driven, interpretable, and interactive weather sum
 It can summarize, visualize, and converse about weather variables (e.g., temperature, wind, humidity, rain) for any location and timeframe.
 
 <p align="center">
-  <img src="docs/overview.png" ><br>
-  <img src="docs/time_series.png" ><br>
-  <img src="docs/boxplot.png" >
+  <img src="docs/overview.png" >
 </p>
 
 ---
@@ -121,18 +119,17 @@ If the browser doesn’t auto-open, visit:
 👉 http://localhost:8501
 
 💡 How to Use
-	1.	Enter a place name (e.g., “Kyoto”)
-	2.	Choose duration:
-	•	Historical → Past climatology (customizable years)
-	•	Current → Real-time weather
-	•	Forecast → Next 1–16 days
-	3.	List variables (comma-separated):
-temperature, wind, humidity, rain
-	4.	Click Submit → Data + visualizations load
-	5.	Explore tabs:
-	•	Overview → LLM summary, figures, and statistics
-	•	Data → Download CSVs
-	6.	In the sidebar, chat naturally:
+1.	Enter a place name (e.g., “Kyoto”)
+2.	Choose duration:
+    •	Historical → Past climatology (customizable years)
+    •	Current → Real-time weather
+    •	Forecast → Next 1–16 days
+3.	List variables (comma-separated): temperature, wind, humidity, rain
+4.	Click Submit → Data + visualizations load
+5.	Explore tabs:
+    •	Overview → LLM summary, figures, and statistics
+    •	Data → Download CSVs
+6.	In the sidebar, chat naturally:
 
 ```bash
 When is max and min temperature seen?
@@ -200,3 +197,8 @@ You’re free to use, modify, and share this code with attribution.
 Meteo-Chat is not a chatbot.
 It’s a scientific analytics companion—a bridge between numerical weather prediction data and interpretable, LLM-assisted insight.
 Built end-to-end by a scientist for scientists, data analysts, and anyone curious about the dynamics behind the numbers.
+
+<p align="center">
+  <img src="docs/time_series.png" ><br>
+  <img src="docs/boxplot.png" >
+</p>
