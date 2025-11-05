@@ -198,6 +198,8 @@ Meteo-Chat is not a chatbot.
 It’s a scientific analytics companion—a bridge between numerical weather prediction data and interpretable, LLM-assisted insight.
 Built end-to-end by a scientist for scientists, data analysts, and anyone curious about the dynamics behind the numbers.
 
+[SCREENSHOTS]
+
 <p align="center">
   <img src="docs/time_series.png" ><br>
   <img src="docs/boxplot.png" >
