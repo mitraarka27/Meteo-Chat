@@ -16,8 +16,8 @@ It can summarize, visualize, and converse about weather variables (e.g., tempera
 
 <p align="center">
   <img src="docs/overview.png" width="32%" />
-  <img src="docs/timeseries.png" width="32%" />
-  <img src="docs/chat.png" width="32%" />
+  <img src="docs/time_series.png" width="32%" />
+  <img src="docs/boxplot.png" width="32%" />
 </p>
 
 ---
