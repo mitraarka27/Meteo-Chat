@@ -13,48 +13,64 @@ app = FastAPI(title="WeatherAI LLM Service")
 # -------------------------------
 # Paths & runtime configuration
 # -------------------------------
-ADAPTER_PATH = Path("artifacts/adapter").resolve()
+
+# Resolve adapter dir relative to this file, so it works from any CWD
+ADAPTER_PATH = Path(__file__).resolve().parents[1] / "artifacts" / "adapter"
 
 print(f"[llm_service] Using adapter dir: {ADAPTER_PATH}")
-if not (ADAPTER_PATH / "adapter_config.json").exists():
-    raise FileNotFoundError(f"adapter_config.json not found in {ADAPTER_PATH}")
 
 BASE_MODEL = os.getenv("BASE_MODEL", "Qwen/Qwen2.5-1.5B-Instruct")
 TOKENIZER_PATH = os.getenv("TOKENIZER_PATH", BASE_MODEL)
-DEVICE_MAP = os.getenv("DEVICE_MAP", "auto")
 
-# Dtype: prefer float16 on GPU, else float32 on CPU
-DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
+# For portability: always use CPU + float32
+DEVICE = "cpu"
+DTYPE = torch.float32
 
 MAX_NEW_TOKENS = int(os.getenv("MAX_NEW_TOKENS", "256"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.2"))
 TOP_P = float(os.getenv("TOP_P", "0.95"))
 
 # -------------------------------
-# Sanity checks
+# Load base model + optional LoRA
 # -------------------------------
-if not (ADAPTER_PATH / "adapter_config.json").exists():
-    raise FileNotFoundError(f"adapter_config.json not found in {ADAPTER_PATH}")
 
-# -------------------------------
-# Load base model + LoRA adapter
-# -------------------------------
 print(f"[LLM] Loading base model: {BASE_MODEL}")
 tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_PATH, use_fast=True)
 
-base = AutoModelForCausalLM.from_pretrained(
+base_model = AutoModelForCausalLM.from_pretrained(
     BASE_MODEL,
     torch_dtype=DTYPE,
-    device_map=DEVICE_MAP,
+    device_map=None,   # IMPORTANT: no 'auto' -> no meta/offload
 )
+base_model.to(DEVICE)
+base_model.eval()
 
-print(f"[LLM] Applying LoRA adapter from {ADAPTER_PATH}")
-model = PeftModel.from_pretrained(base, str(ADAPTER_PATH))
-model.eval()
+model = base_model
+
+# Try to apply LoRA if adapter exists; otherwise fall back gracefully
+if ADAPTER_PATH.exists() and (ADAPTER_PATH / "adapter_config.json").exists():
+    try:
+        print(f"[LLM] Applying LoRA adapter from {ADAPTER_PATH}")
+        model = PeftModel.from_pretrained(
+            base_model,
+            str(ADAPTER_PATH),
+            torch_dtype=DTYPE,
+            device_map=None,   # keep on CPU
+        )
+        model.to(DEVICE)
+        model.eval()
+        print("[LLM] LoRA adapter loaded successfully.")
+    except Exception as e:
+        print(f"[LLM] Failed to load LoRA adapter: {e}")
+        print("[LLM] Falling back to base model only.")
+        model = base_model
+else:
+    print("[LLM] No adapter found or incomplete; using base model only.")
 
 # -------------------------------
 # Endpoints
 # -------------------------------
+
 @app.get("/health")
 def health():
     return {
@@ -65,6 +81,7 @@ def health():
         "dtype": str(next(model.parameters()).dtype),
     }
 
+
 @app.post("/generate")
 async def generate(req: Request):
     data = await req.json()
@@ -72,7 +89,7 @@ async def generate(req: Request):
     if not prompt:
         return JSONResponse(content={"text": ""})
 
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
 
     with torch.no_grad():
         out = model.generate(
@@ -86,9 +103,11 @@ async def generate(req: Request):
     text = tokenizer.decode(out[0], skip_special_tokens=True)
     return {"text": text.strip()}
 
+
 # -------------------------------
 # __main__ (uvicorn runner)
 # -------------------------------
+
 if __name__ == "__main__":
     import uvicorn
 
