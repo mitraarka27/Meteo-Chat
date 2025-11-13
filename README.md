@@ -20,53 +20,6 @@ It can summarize, visualize, and converse about weather variables (e.g., tempera
 
 ---
 
-## ✨ What the App Does
-
-- Queries the **Open-Meteo API** for historical, current, or forecasted data.
-- Converts **free-form user variables** (like *“wind and rain”*) into canonical API parameters (like `wind_speed_10m`, `precipitation`).
-- Produces **interactive time-series and box-plots**, including rolling mean ± std and diurnal/monthly distributions.
-- Generates **LLM-based summaries** that remain faithful to data (no hallucinations).
-- Works even **offline or without the LLM**, using deterministic statistical fallbacks.
-- Provides **downloadable CSVs** (per variable or combined).
-- Features a polished **Streamlit UI** with a sidebar chat interface for contextual questions.
-
----
-
-## Why It’s Interesting
-
-Meteo-Chat demonstrates the integration of **modern AI infrastructure with scientific APIs**, combining multiple technical layers:
-
-| Component | Technology / Skill |
-|------------|-------------------|
-| Data Source | [Open-Meteo](https://open-meteo.com/), backed by ERA5 & NWP models |
-| Data Orchestration | Custom MCP server for API planning/execution |
-| Frontend | Streamlit (custom CSS + responsive Quicksand theme) |
-| LLM Integration | Local FastAPI inference server (LoRA fine-tuned on meteorological text) |
-| Structured Summaries | Custom JSON-schema interface & deterministic fallbacks |
-| Visualization | Matplotlib (time-series, rolling mean, IQR boxplots) |
-| Packaging | Python `pyproject.toml` with CLI launchers (`meteo-chat`, `meteo-chat-app`) |
-
-The project also showcases:
-- **LLM fine-tuning and formatting control**
-- **Schema-aware generation**
-- **API orchestration via MCP**
-- **User-facing data visualization and conversational retrieval**
-
----
-
-## Key Features
-
-- **Three data modes:** historical, current, forecast  
-- **Variable aliasing:** free-form → canonical Open-Meteo parameters  
-- **Statistical summaries:** mean, median, std, IQR, range, variability %, and trends  
-- **Sparse-aware plots:** rain/snow shown only when non-zero  
-- **Deterministic fallbacks:** e.g., “When is max and min temperature seen?” → computed from diurnal cycle  
-- **Context-aware chat:** dataset-bounded responses from local LLM  
-- **CSV exports:** combined + per variable  
-- **Modern UI:** clean cards, tabs, and sidebar chat with Quicksand typography  
-
----
-
 ## Installation
 
 Meteo-Chat runs two components:
@@ -212,6 +165,53 @@ When is max and min temperature seen?
 ```
 
 → The app computes or retrieves the answer.
+
+---
+
+## ✨ What the App Does
+
+- Queries the **Open-Meteo API** for historical, current, or forecasted data.
+- Converts **free-form user variables** (like *“wind and rain”*) into canonical API parameters (like `wind_speed_10m`, `precipitation`).
+- Produces **interactive time-series and box-plots**, including rolling mean ± std and diurnal/monthly distributions.
+- Generates **LLM-based summaries** that remain faithful to data (no hallucinations).
+- Works even **offline or without the LLM**, using deterministic statistical fallbacks.
+- Provides **downloadable CSVs** (per variable or combined).
+- Features a polished **Streamlit UI** with a sidebar chat interface for contextual questions.
+
+---
+
+## Why It’s Interesting
+
+Meteo-Chat demonstrates the integration of **modern AI infrastructure with scientific APIs**, combining multiple technical layers:
+
+| Component | Technology / Skill |
+|------------|-------------------|
+| Data Source | [Open-Meteo](https://open-meteo.com/), backed by ERA5 & NWP models |
+| Data Orchestration | Custom MCP server for API planning/execution |
+| Frontend | Streamlit (custom CSS + responsive Quicksand theme) |
+| LLM Integration | Local FastAPI inference server (LoRA fine-tuned on meteorological text) |
+| Structured Summaries | Custom JSON-schema interface & deterministic fallbacks |
+| Visualization | Matplotlib (time-series, rolling mean, IQR boxplots) |
+| Packaging | Python `pyproject.toml` with CLI launchers (`meteo-chat`, `meteo-chat-app`) |
+
+The project also showcases:
+- **LLM fine-tuning and formatting control**
+- **Schema-aware generation**
+- **API orchestration via MCP**
+- **User-facing data visualization and conversational retrieval**
+
+---
+
+## Key Features
+
+- **Three data modes:** historical, current, forecast  
+- **Variable aliasing:** free-form → canonical Open-Meteo parameters  
+- **Statistical summaries:** mean, median, std, IQR, range, variability %, and trends  
+- **Sparse-aware plots:** rain/snow shown only when non-zero  
+- **Deterministic fallbacks:** e.g., “When is max and min temperature seen?” → computed from diurnal cycle  
+- **Context-aware chat:** dataset-bounded responses from local LLM  
+- **CSV exports:** combined + per variable  
+- **Modern UI:** clean cards, tabs, and sidebar chat with Quicksand typography  
 
 ⸻
 
