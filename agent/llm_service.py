@@ -13,7 +13,7 @@ app = FastAPI(title="WeatherAI LLM Service")
 # -------------------------------
 # Paths & runtime configuration
 # -------------------------------
-ADAPTER_PATH = Path("/Users/mitra/vibe_code/weatherai/artifacts/adapter").resolve()
+ADAPTER_PATH = Path("../artifacts/adapter").resolve()
 
 print(f"[llm_service] Using adapter dir: {ADAPTER_PATH}")
 if not (ADAPTER_PATH / "adapter_config.json").exists():
