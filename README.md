@@ -69,14 +69,61 @@ The project also showcases:
 
 ## Installation
 
-### 1. Clone the repository
+Meteo-Chat runs two components:
+
+###### 1. **Python backend + Streamlit UI**
+###### 2. **Node.js MCP server** (for stable Open-Meteo planning/execution)
+
+To ensure everything works out of the box, please prepare your system as follows.
+
+---
+
+## 1. System Requirements
+
+- **Python ≥ 3.9**
+- **Node.js ≥ 18 (recommended: Node 20 LTS)**
+- **npm** (installed automatically with Node)
+
+Because many users have broken or conflicting Node/npm installs (Homebrew, system Node, legacy Node, etc.),  
+we strongly recommend installing Node through **nvm**.
+
+---
+
+## 2. Install Node.js Using nvm (Recommended)
+
+This prevents almost all npm/mcp_server module-not-found errors.
+
+### Install nvm
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+```
+
+Restart your terminal, then verify:
+```bash
+nvm --version
+```
+
+Install stable Node.js (recommended)
+```bash
+nvm install 20
+nvm use 20
+```
+
+Check
+```bash
+node -v
+npm -v
+```
+
+### 3. Clone the repository
 
 ```bash:
 git clone https://github.com/mitraarka27/Meteo-Chat.git
 cd Meteo-Chat
 ```
 
-### 2. Build the Python environment and install the package
+### 4. Build the Python environment and install the package
 
 Use the provided Makefile:
 
@@ -101,7 +148,7 @@ cd ..
 Use the CLI:
 
 ```bash:
-meteo-chat
+source .venv/bin/activate && meteo-chat
 ```
 
 This launches:
