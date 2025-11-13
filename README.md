@@ -117,12 +117,11 @@ node -v
 npm -v
 ```
 
-Before cloning:
+Before cloning, install Git LFS (one time per system):
 
 ```bash
-# Install Git LFS (one time per system)
-brew install git-lfs      # macOS (Homebrew)
-git lfs install
+brew install git-lfs      
+git lfs install           
 ```
 
 ### 3. Clone the repository
