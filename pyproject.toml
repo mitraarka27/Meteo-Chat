@@ -12,31 +12,37 @@ authors = [{ name = "Arka Mitra" }]
 requires-python = ">=3.9"
 
 dependencies = [
+  # Core app
   "streamlit>=1.34",
   "pandas>=2.1",
   "matplotlib>=3.8",
   "requests>=2.31",
+
+  # LLM + server stack (so the local model actually runs)
+  "torch>=2.3",
+  "transformers>=4.41",
+  "peft>=0.11",
+  "accelerate>=0.33",
+  "safetensors>=0.4",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
 ]
 
 [project.urls]
-Homepage = "https://github.com/mitraarka27/weatherai"
-Issues   = "https://github.com/mitraarka27/weatherai/issues"
+Homepage = "https://github.com/mitraarka27/Meteo-Chat"
+Issues   = "https://github.com/mitraarka27/Meteo-Chat/issues"
 
 [project.scripts]
-# one-shot launcher (starts MCP then Streamlit)
 meteo-chat      = "meteo_chat.cli:main"
-# optional direct entrypoints
 meteo-chat-app  = "meteo_chat.cli:run_app"
 meteo-chat-mcp  = "meteo_chat.cli:run_mcp"
 
 [tool.setuptools]
 include-package-data = true
 
-# 🔑 auto-discover ALL packages (so mcp_server is included)
 [tool.setuptools.packages.find]
 include = ["meteo_chat*", "mcp_server*"]
 exclude = ["tests*", "docs*", "examples*"]
 
-# If you ship non-Python files inside meteo_chat/, list them here (optional)
 [tool.setuptools.package-data]
 meteo_chat = ["static/**", "assets/**"]

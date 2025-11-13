@@ -95,4 +95,4 @@ if __name__ == "__main__":
     host = os.getenv("LLM_HOST", "127.0.0.1")
     port = int(os.getenv("LLM_PORT", "8899"))
     print(f"[LLM] Starting FastAPI on http://{host}:{port}")
-    uvicorn.run("weatherai.agent.llm_service:app", host=host, port=port, reload=False)
+    uvicorn.run(app, host=host, port=port, reload=False)

@@ -22,3 +22,4 @@ artifacts/*/training_args.bin
 build/
 dist/
 *.egg-info/
+.streamlit/

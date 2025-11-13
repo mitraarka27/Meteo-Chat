@@ -97,7 +97,7 @@ def run_llm():
     env.setdefault("LLM_PORT", str(LLM_DEFAULT_PORT))
 
     # Use module execution so imports resolve from installed package
-    cmd = [sys.executable, "-m", "weatherai.agent.llm_service"]
+    cmd = [sys.executable, "-m", "agent.llm_service"]
     # No special cwd needed if package is installed; keep at ROOT for safety.
     return subprocess.Popen(cmd, cwd=str(ROOT), env=env)
 

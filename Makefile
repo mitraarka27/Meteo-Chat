@@ -5,6 +5,7 @@ venv:
 
 install: venv
 	. .venv/bin/activate && pip install --upgrade pip && pip install -e .
+	cd mcp_server && npm install
 
 run:
 	. .venv/bin/activate && meteo-chat-app

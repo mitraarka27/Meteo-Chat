@@ -69,49 +69,91 @@ The project also showcases:
 
 ## Installation
 
-Clone the repository:
-```bash
+### 1. Clone the repository
+
+bash:
+```
 git clone https://github.com/mitraarka27/Meteo-Chat.git
-cd weatherai
+cd Meteo-Chat
 ```
 
-Create a virtual environment and install dependencies:
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+### 2. Build the Python environment and install the package
+
+Use the provided Makefile:
+
+bash:
+```
+make install
 ```
 
-Dependencies include:
-```bash
-streamlit>=1.33
-matplotlib>=3.8
-pandas>=2.0
-requests>=2.31
+This creates .venv/, upgrades pip, and installs the package in editable mode.
+
+### 3. Install Node.js dependencies for the MCP server
+
+bash:
+```
+cd mcp_server
+npm install
+cd ..
 ```
 
 ## How to Run
 
-### Option 1 — Full App (CLI)
-```bash
+### Option A — One command (recommended)
+
+Start the entire application stack (MCP server + LLM + Streamlit UI):
+
+bash:
+```
+make run-all
+```
+
+or using the CLI:
+
+bash:
+```
 meteo-chat
 ```
 
-This command:
-	1.	Starts the MCP server (http://127.0.0.1:8787)
-	2.	Launches the local LLM (http://127.0.0.1:8899)
-	3.	Opens the Streamlit UI (http://localhost:8501) in your browser.
+This launches:
+	•	MCP server → http://127.0.0.1:8787
+	•	Local LLM → http://127.0.0.1:8899
+	•	Streamlit UI → http://localhost:8501
 
-### Option 2 — Manual (development)
+### Option B — Streamlit UI only (no LLM required)
 
-Terminal 1 — MCP:
-```bash
-cd mcp_server
-npm i && npm run dev
+Runs the app with deterministic summaries when the LLM is not available:
+
+bash:
+```
+make run
 ```
 
-Terminal 2 — Streamlit:
-```bash
+or:
+
+bash:
+```
+meteo-chat-app
+```
+
+### Option C — Manual developer mode (advanced)
+
+Terminal 1 — MCP server
+bash:
+```
+cd mcp_server
+npm run dev
+```
+
+Terminal 2 — LLM server
+bash:
+```
+python -m agent.llm_service
+```
+
+Terminal 3 — Streamlit UI
+bash:
+```
 streamlit run apps/streamlit_app/app.py
 ```
 
