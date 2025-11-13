@@ -83,6 +83,7 @@ To ensure everything works out of the box, please prepare your system as follows
 - **Python ≥ 3.9**
 - **Node.js ≥ 18 (recommended: Node 20 LTS)**
 - **npm** (installed automatically with Node)
+- **Git LFS** (for LoRA adapter)
 
 Because many users have broken or conflicting Node/npm installs (Homebrew, system Node, legacy Node, etc.),  
 we strongly recommend installing Node through **nvm**.
@@ -116,11 +117,20 @@ node -v
 npm -v
 ```
 
+Before cloning:
+
+```bash
+# Install Git LFS (one time per system)
+brew install git-lfs      # macOS (Homebrew)
+git lfs install
+```
+
 ### 3. Clone the repository
 
 ```bash:
 git clone https://github.com/mitraarka27/Meteo-Chat.git
 cd Meteo-Chat
+git lfs pull
 ```
 
 ### 4. Build the Python environment and install the package
