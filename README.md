@@ -95,14 +95,6 @@ make install
 
 This creates .venv/, upgrades pip, and installs the package in editable mode.
 
-### 3. Install Node.js dependencies for the MCP server
-
-```bash:
-cd mcp_server
-npm install
-cd ..
-```
-
 ## How to Run
 
 ### Option A — One command (recommended)
