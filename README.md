@@ -98,13 +98,7 @@ cd ..
 
 ### Option A — One command (recommended)
 
-Start the entire application stack (MCP server + LLM + Streamlit UI):
-
-```bash:
-make run-all
-```
-
-or using the CLI:
+Use the CLI:
 
 ```bash:
 meteo-chat
@@ -118,12 +112,6 @@ This launches:
 ### Option B — Streamlit UI only (no LLM required)
 
 Runs the app with deterministic summaries when the LLM is not available:
-
-```bash:
-make run
-```
-
-or:
 
 ```bash:
 meteo-chat-app
