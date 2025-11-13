@@ -542,6 +542,17 @@ def _caps_supported_set(caps: dict, mode: str) -> set[str]:
     # normalize all to lowercase for consistent comparison
     return {v.lower() for v in supp}
 
+def mcp_post(path: str, payload: dict):
+    url = f"http://127.0.0.1:8787{path}"
+    r = requests.post(url, json=payload, timeout=20)
+    if not r.ok:
+        # Let callers handle r.json() if present
+        try:
+            msg = r.json().get("error", r.text)
+        except Exception:
+            msg = r.text
+        raise RuntimeError(f"MCP error ({r.status_code}): {msg}")
+    return r.json()
 
 def filter_supported_variables(caps: dict, variables: list[str], mode: str) -> tuple[list[str], list[str]]:
     """
@@ -564,7 +575,11 @@ def filter_supported_variables(caps: dict, variables: list[str], mode: str) -> t
 
 def run_query(use_place, mode_sel, vars_sel, opt):
     caps = mcp_post("/describe_capabilities", {})
-    loc = mcp_post("/resolve_location", {"query": use_place})
+    try:
+        loc = mcp_post("/resolve_location", {"query": use_place})
+    except RuntimeError as e:
+        st.error(str(e))
+        st.stop()
     geom = {"type":"Point","lat":loc["lat"],"lon":loc["lon"]}
     # vars_sel = resolve_variable_aliases(vars_sel)
     plan = mcp_post("/plan_query", {

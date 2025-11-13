@@ -4,80 +4,191 @@
  * Removes all Nominatim dependencies (403 issues) and adds caching.
  */
 
-import { fetchJSONWithCache, RateLimiter } from "./utils";
+// mcp_server/src/location.ts
 
-export type ResolvedLocation = {
-  display_name: string;
-  lat: number;
-  lon: number;
-  bbox: [number, number, number, number]; // [south, west, north, east]
-  area_km2: number;
-};
+import type { Request, Response } from "express";
+import { z } from "zod";
+import { fetch } from "undici";
 
-// Open-Meteo endpoints do NOT need rate limiting, but keep RL for uniformity.
-const RL = new RateLimiter(200); // very gentle, 0.2s spacing
+const OpenMeteoGeoSchema = z.object({
+  results: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        name: z.string(),
+        country: z.string().optional(),
+        country_code: z.string().optional(),
+        admin1: z.string().optional(),
+        latitude: z.number(),
+        longitude: z.number(),
+        elevation: z.number().optional(),
+        population: z.number().optional(),
+        timezone: z.string().optional(),
+        feature_code: z.string().optional(),
+      })
+    )
+    .optional(),
+});
 
-/** 
- * Resolve a place name → coordinates using Open-Meteo Geocoding API.
- * Returns structure identical to old Nominatim version so rest of MCP stays unchanged.
- */
-export async function resolveLocation(query: string): Promise<ResolvedLocation> {
-  const url =
-    `https://geocoding-api.open-meteo.com/v1/search` +
-    `?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+type GeoResult = z.infer<typeof OpenMeteoGeoSchema>["results"][number];
 
-  const j: any = await fetchJSONWithCache(url, {
-    ttlMs: 24 * 60 * 60 * 1000,  // 1 day cache
-    rl: RL,
-    rlKey: "openmeteo_geocode"
-  });
+// ---- helpers ---------------------------------------------------------------
 
-  if (!j?.results || j.results.length === 0) {
-    throw new Error("place_not_found");
-  }
-
-  const it = j.results[0];
-
-  // Open-Meteo provides no explicit bbox → approximate small bounding box
-  const lat = it.latitude;
-  const lon = it.longitude;
-
-  // Create a tight +/- 0.05° bbox (~5–7 km)
-  const south = lat - 0.05;
-  const north = lat + 0.05;
-  const west  = lon - 0.05;
-  const east  = lon + 0.05;
-
-  const area_km2 =
-    Math.max(1, Math.abs(east - west) * Math.abs(north - south) * 111 * 111);
-
-  return {
-    display_name: `${it.name}${it.country ? ", " + it.country : ""}`,
-    lat,
-    lon,
-    bbox: [south, west, north, east],
-    area_km2
-  };
+function looksLikeLatLon(q: string) {
+  const m = q.match(
+    /^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$/ // lat, lon
+  );
+  if (!m) return null;
+  const lat = Number(m[1]);
+  const lon = Number(m[3]);
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+  return { lat, lon };
 }
 
-/**
- * Timezone lookup using Open-Meteo.
- */
-export async function getTimezone(
-  lat: number,
-  lon: number
-): Promise<{ tz: string }> {
+function buildLabel(r: GeoResult): string {
+  const parts = [r.name];
+  if (r.admin1) parts.push(r.admin1);
+  if (r.country) parts.push(r.country);
+  return parts.join(", ");
+}
 
-  const url =
-    `https://api.open-meteo.com/v1/forecast` +
-    `?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m&timezone=auto`;
+function scoreCandidate(query: string, r: GeoResult): number {
+  const qParts = query
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0);
 
-  const j: any = await fetchJSONWithCache(url, {
-    ttlMs: 6 * 60 * 60 * 1000,
-    rl: RL,
-    rlKey: "openmeteo_tz"
-  });
+  const nameHint = qParts[0] ?? "";
+  const regionHints = qParts.slice(1); // e.g. ["or", "usa"]
 
-  return { tz: j?.timezone || "UTC" };
+  const admin1 = (r.admin1 ?? "").toLowerCase();
+  const country = (r.country ?? "").toLowerCase();
+  const ccode = (r.country_code ?? "").toLowerCase();
+  const name = (r.name ?? "").toLowerCase();
+
+  let score = 0;
+
+  // exact city-name match gets a small boost
+  if (name === nameHint) score += 3;
+
+  for (const hRaw of regionHints) {
+    const h = hRaw.toLowerCase();
+
+    // country code like "US", "IN"
+    if (h.length <= 3 && ccode === h.toUpperCase()) score += 10;
+
+    // state/region like "oregon", "ma"
+    if (admin1.includes(h)) score += 8;
+
+    // country name like "united states", "india"
+    if (country.includes(h)) score += 6;
+  }
+
+  // Capital / major places
+  if (r.feature_code && r.feature_code.startsWith("PPL")) {
+    score += 1;
+  }
+
+  // Population as gentle tiebreaker
+  if (r.population && r.population > 0) {
+    score += Math.log10(r.population + 1);
+  }
+
+  return score;
+}
+
+// ---- main handler ----------------------------------------------------------
+
+export async function resolveLocation(req: Request, res: Response) {
+  try {
+    const raw = (req.body?.query ?? "").toString().trim();
+    if (!raw) {
+      return res.status(400).json({ error: "Missing 'query' string" });
+    }
+
+    // 1) Direct lat,lon support
+    const coord = looksLikeLatLon(raw);
+    if (coord) {
+      const location = {
+        name: raw,
+        latitude: coord.lat,
+        longitude: coord.lon,
+        label: raw,
+      };
+      return res.json({
+        query: raw,
+        location,
+        candidates: [location],
+      });
+    }
+
+    // 2) Name-based geocoding via Open-Meteo
+    const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+    url.searchParams.set("name", raw);
+    url.searchParams.set("count", "10");
+    url.searchParams.set("language", "en");
+    url.searchParams.set("format", "json");
+
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      const text = await resp.text();
+      return res
+        .status(502)
+        .json({ error: "Geocoding upstream error", status: resp.status, body: text });
+    }
+
+    const json = await resp.json();
+    const parsed = OpenMeteoGeoSchema.parse(json);
+    const results = parsed.results ?? [];
+
+    if (results.length === 0) {
+      return res
+        .status(404)
+        .json({ error: `No locations found for query '${raw}'` });
+    }
+
+    // 3) Score + pick best candidate
+    const scored = results
+      .map((r) => ({ r, score: scoreCandidate(raw, r) }))
+      .sort((a, b) => b.score - a.score);
+
+    const best = scored[0].r;
+
+    const location = {
+      id: best.id,
+      name: best.name,
+      admin1: best.admin1,
+      country: best.country,
+      country_code: best.country_code,
+      latitude: best.latitude,
+      longitude: best.longitude,
+      elevation: best.elevation,
+      population: best.population,
+      timezone: best.timezone,
+      label: buildLabel(best),
+    };
+
+    return res.json({
+      query: raw,
+      location,
+      candidates: scored.map(({ r }) => ({
+        id: r.id,
+        name: r.name,
+        admin1: r.admin1,
+        country: r.country,
+        country_code: r.country_code,
+        latitude: r.latitude,
+        longitude: r.longitude,
+        elevation: r.elevation,
+        population: r.population,
+        timezone: r.timezone,
+        feature_code: r.feature_code,
+        label: buildLabel(r),
+      })),
+    });
+  } catch (err: any) {
+    console.error("[resolveLocation] Error:", err);
+    return res.status(500).json({ error: "Internal location resolver error" });
+  }
 }
