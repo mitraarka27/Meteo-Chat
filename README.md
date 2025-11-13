@@ -71,8 +71,7 @@ The project also showcases:
 
 ### 1. Clone the repository
 
-bash:
-```
+```bash:
 git clone https://github.com/mitraarka27/Meteo-Chat.git
 cd Meteo-Chat
 ```
@@ -81,8 +80,7 @@ cd Meteo-Chat
 
 Use the provided Makefile:
 
-bash:
-```
+```bash:
 make install
 ```
 
@@ -90,8 +88,7 @@ This creates .venv/, upgrades pip, and installs the package in editable mode.
 
 ### 3. Install Node.js dependencies for the MCP server
 
-bash:
-```
+```bash:
 cd mcp_server
 npm install
 cd ..
@@ -103,15 +100,13 @@ cd ..
 
 Start the entire application stack (MCP server + LLM + Streamlit UI):
 
-bash:
-```
+```bash:
 make run-all
 ```
 
 or using the CLI:
 
-bash:
-```
+```bash:
 meteo-chat
 ```
 
@@ -124,36 +119,31 @@ This launches:
 
 Runs the app with deterministic summaries when the LLM is not available:
 
-bash:
-```
+```bash:
 make run
 ```
 
 or:
 
-bash:
-```
+```bash:
 meteo-chat-app
 ```
 
 ### Option C — Manual developer mode (advanced)
 
 Terminal 1 — MCP server
-bash:
-```
+```bash:
 cd mcp_server
 npm run dev
 ```
 
 Terminal 2 — LLM server
-bash:
-```
+```bash:
 python -m agent.llm_service
 ```
 
 Terminal 3 — Streamlit UI
-bash:
-```
+```bash:
 streamlit run apps/streamlit_app/app.py
 ```
 
