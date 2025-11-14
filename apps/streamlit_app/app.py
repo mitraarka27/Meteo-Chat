@@ -503,43 +503,62 @@ def resolve_variable_aliases(query_vars: list[str], mode: str) -> list[str]:
 def _caps_supported_set(caps: dict, mode: str) -> set[str]:
     """
     Safely extract a set of supported variable names from /describe_capabilities.
-    Handles all shapes (flat list, list of dicts, or dict-of-lists).
+    Handles:
+      - { "variables": [ {id,label,...}, ... ] }
+      - { "variables": { "forecast":[...], "historical":[...] } }
+      - { "variables": ["temperature_2m", "precipitation", ...] }
+    Returns all names in *lowercase*.
     """
     supp = set()
     vs = caps.get("variables", {})
 
+    # -- dict-of-lists case: {"forecast":[...], "historical":[...]}
     if isinstance(vs, dict):
-        # e.g., {"forecast":[...], "historical":[...]}
         if mode in vs:
             arr = vs[mode]
             if isinstance(arr, (list, tuple, set)):
                 for v in arr:
                     if isinstance(v, dict):
-                        name = v.get("name") or v.get("variable")
-                        if name: supp.add(str(name))
+                        name = (
+                            v.get("id")
+                            or v.get("name")
+                            or v.get("variable")
+                        )
+                        if name:
+                            supp.add(str(name))
                     elif isinstance(v, str):
                         supp.add(v)
         else:
-            # union across all categories
+            # union across all categories if no per-mode entry
             for arr in vs.values():
                 if isinstance(arr, (list, tuple, set)):
                     for v in arr:
                         if isinstance(v, dict):
-                            name = v.get("name") or v.get("variable")
-                            if name: supp.add(str(name))
+                            name = (
+                                v.get("id")
+                                or v.get("name")
+                                or v.get("variable")
+                            )
+                            if name:
+                                supp.add(str(name))
                         elif isinstance(v, str):
                             supp.add(v)
 
+    # -- flat list case: [{"id":...}, ...] or ["temperature_2m", ...]
     elif isinstance(vs, (list, tuple, set)):
-        # e.g., [{"name":"temperature_2m"}, {"name":"precipitation"}] or ["temperature_2m","precipitation"]
         for v in vs:
             if isinstance(v, dict):
-                name = v.get("name") or v.get("variable")
-                if name: supp.add(str(name))
+                name = (
+                    v.get("id")
+                    or v.get("name")
+                    or v.get("variable")
+                )
+                if name:
+                    supp.add(str(name))
             elif isinstance(v, str):
                 supp.add(v)
 
-    # normalize all to lowercase for consistent comparison
+    # normalize to lowercase
     return {v.lower() for v in supp}
 
 def mcp_post(path: str, payload: dict):
